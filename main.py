@@ -143,7 +143,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                 ),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
-                (255, 255, 255),
+                (0, 0, 255) if stage == 'Wrong' else (255, 255, 255),
                 2,
                 cv2.LINE_AA,
             )
@@ -158,7 +158,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                 ),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
-                (255, 255, 255),
+                (0, 0, 255) if stage == 'Wrong' else (255, 255, 255),
                 2,
                 cv2.LINE_AA,
             )
