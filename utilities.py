@@ -42,15 +42,34 @@ def detect_joints(lm):
 
 
 # Utility function for displaying the attributes on screen
-def display_table(exercise, frame , counter, status, displayPos):
-    cv2.putText(frame, "Activity : " + exercise.replace("-", " "),
-                (10, 65), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2,
-                cv2.LINE_AA)
-    cv2.putText(frame, "Counter : " + str(counter), (10, 100),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2, cv2.LINE_AA)
-    cv2.putText(frame, "Status : " + str(status), (10, 135),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
-    cv2.putText(frame, "Posture : " + str(displayPos), (10, 170),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
+def display_table(frame , counter, stage, msg):
+    # cv2.putText(frame, "Activity : " + exercise.replace("-", " "),
+    #             (10, 65), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2,
+    #             cv2.LINE_AA)
+    # cv2.putText(frame, "Counter : " + str(counter), (10, 100),
+    #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2, cv2.LINE_AA)
+    # cv2.putText(frame, "Status : " + str(status), (10, 135),
+    #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
+    # cv2.putText(frame, "Posture : " + str(displayPos), (10, 170),
+    #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
+    # return frame
+    cv2.putText(frame, "REPEAT", (15, 20), cv2.FONT_HERSHEY_SIMPLEX,
+        0.75, (0, 0, 0), 1, cv2.LINE_AA,
+    )
+    cv2.putText(frame, str(counter), (15, 60), cv2.FONT_HERSHEY_SIMPLEX,
+        1, (255, 255, 255), 2, cv2.LINE_AA,
+    )
+    cv2.putText(frame, "STAGE", (125, 20), cv2.FONT_HERSHEY_SIMPLEX,
+        0.75, (0, 0, 0), 1,cv2.LINE_AA,
+    )
+    cv2.putText(frame, str(stage), (125, 60), cv2.FONT_HERSHEY_SIMPLEX,
+        1, (255, 255, 255), 2, cv2.LINE_AA,
+    )
+    cv2.putText(frame, "CORRECTION", (15, 100), cv2.FONT_HERSHEY_SIMPLEX,
+        0.75, (0, 0, 0), 1, cv2.LINE_AA,
+    )
+    cv2.putText(frame, str(msg), (15, 140), cv2.FONT_HERSHEY_SIMPLEX,
+        1, (255, 255, 255), 2, cv2.LINE_AA,
+    )
     return frame
     

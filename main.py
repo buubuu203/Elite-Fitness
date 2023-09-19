@@ -109,11 +109,8 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             cv2.putText(
                 image,
                 "Right Leg: " + str(int(Right_Leg_Angle)),
-                tuple(
-                    np.multiply(right_knee, [image.shape[1], image.shape[0]]).astype(
-                        int
-                    )
-                ),
+                tuple(np.multiply(
+                    right_knee, [image.shape[1], image.shape[0]]).astype(int)),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
                 (255, 255, 255),
@@ -136,11 +133,8 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             cv2.putText(
                 image,
                 "Left Arm: " + str(int(Left_Arm_Angle)),
-                tuple(
-                    np.multiply(left_elbow, [image.shape[1], image.shape[0]]).astype(
-                        int
-                    )
-                ),
+                tuple(np.multiply(
+                    left_elbow, [image.shape[1], image.shape[0]]).astype(int)),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
                 (0, 0, 255) if stage == 'Wrong' else (255, 255, 255),
@@ -151,11 +145,8 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             cv2.putText(
                 image,
                 "Right Arm: " + str(int(Right_Arm_Angle)),
-                tuple(
-                    np.multiply(right_elbow, [image.shape[1], image.shape[0]]).astype(
-                        int
-                    )
-                ),
+                tuple(np.multiply(
+                    right_elbow, [image.shape[1], image.shape[0]]).astype(int)),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
                 (0, 0, 255) if stage == 'Wrong' else (255, 255, 255),
@@ -194,66 +185,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         cv2.rectangle(image, (0, 0), (600, 180), (245, 117, 16), -1)
 
         # Rep data
-        cv2.putText(
-            image,
-            "REPEAT",
-            (15, 20),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.75,
-            (0, 0, 0),
-            1,
-            cv2.LINE_AA,
-        )
-        cv2.putText(
-            image,
-            str(counter),
-            (15, 60),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1,
-            (255, 255, 255),
-            2,
-            cv2.LINE_AA,
-        )
-        cv2.putText(
-            image,
-            "STAGE",
-            (125, 20),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.75,
-            (0, 0, 0),
-            1,
-            cv2.LINE_AA,
-        )
-        cv2.putText(
-            image,
-            str(stage),
-            (125, 60),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1,
-            (255, 255, 255),
-            2,
-            cv2.LINE_AA,
-        )
-        cv2.putText(
-            image,
-            "CORRECTION",
-            (15, 100),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.75,
-            (0, 0, 0),
-            1,
-            cv2.LINE_AA,
-        )
-        cv2.putText(
-            image,
-            str(msg),
-            (15, 140),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1,
-            (255, 255, 255),
-            2,
-            cv2.LINE_AA,
-        )
+        display_table(image, counter, stage, msg)
 
         # Render detection
         mp_drawing.draw_landmarks(
