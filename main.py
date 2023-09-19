@@ -7,7 +7,7 @@ from joint_angles import JointAngle
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
-cap = cv2.VideoCapture("Exercise_Videos/male-barbell-curl-front.mp4")
+cap = cv2.VideoCapture("Exercise_Videos/male-barbell-curl-side.MP4")
 # Curl counter variables
 counter = 0
 stage = None
