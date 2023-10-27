@@ -7,11 +7,13 @@ from joint_angles import JointAngle
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
-cap = cv2.VideoCapture("Exercise_Videos/male-barbell-curl-side.MP4")
+cap = cv2.VideoCapture("Exercise_Videos/standard.mp4")
+
 # Curl counter variables
 counter = 0
 stage = None
-msg = ''
+msg = None
+frameNo = 0
 
 Left_Leg_Angle = 0
 Right_Leg_Angle = 0
@@ -22,9 +24,10 @@ Abdomen_Angle = 0
 Back_Angle = 0
 
 # Setup Mediapipe instance
-with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+with mp_pose.Pose(min_detection_confidence=0.75, min_tracking_confidence=0.75) as pose:
     while cap.isOpened():
         ret, frame = cap.read()
+        frameNo += 1
 
         # Recolor image to RGB
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -46,6 +49,8 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             right_hip = detect_joint(landmarks, 'RIGHT_HIP')
             hip = [(right_hip[0] + left_hip[0]) / 2,
                    (right_hip[1] + left_hip[1]) / 2]
+            left_wrist = detect_joint(landmarks, 'LEFT_WRIST')
+            right_wrist = detect_joint(landmarks, 'RIGHT_WRIST')
             left_knee = detect_joint(landmarks, 'LEFT_KNEE')
             right_knee = detect_joint(landmarks, 'RIGHT_KNEE')
             knee = [
@@ -62,17 +67,28 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             ref = [(hip[0] + shoulder[0]) / 2, (hip[1] + shoulder[1]) / 2]
             left_elbow = detect_joint(landmarks, 'LEFT_ELBOW')
             right_elbow = detect_joint(landmarks, 'RIGHT_ELBOW')
+            left_ankle = detect_joint(landmarks, 'LEFT_ANKLE')
+            right_ankle = detect_joint(landmarks, 'RIGHT_ANKLE')
+            left_heel = detect_joint(landmarks, 'LEFT_HEEL')
+            right_heel = detect_joint(landmarks, 'RIGHT_HEEL')
+            left_mouth = detect_joint(landmarks, 'MOUTH_LEFT')
+            right_mouth = detect_joint(landmarks, 'MOUTH_RIGHT')
+            mouth = [
+                (left_mouth[0] + right_mouth[0]) / 2,
+                (left_mouth[1] + right_mouth[1]) / 2
+            ]
 
             # Calculate angle
             joint_angle = JointAngle(landmarks)
 
-            Left_Leg_Angle = joint_angle.left_leg_angle()
-            Right_Leg_Angle = joint_angle.right_leg_angle()
-            Neck_Angle = joint_angle.neck_angle()
-            Left_Arm_Angle = joint_angle.left_arm_angle()
-            Right_Arm_Angle = joint_angle.right_arm_angle()
-            Abdomen_Angle = joint_angle.abdomen_angle()
-            Back_Angle = joint_angle.back_angle()
+            Left_Leg_Angle = joint_angle.left_leg_angle(left_hip, left_knee, left_ankle)
+            Right_Leg_Angle = joint_angle.right_leg_angle(right_hip, right_knee, right_ankle)
+            Neck_Angle = joint_angle.neck_angle(mouth, shoulder, hip)
+            Left_Arm_Angle = joint_angle.left_arm_angle(left_shoulder, left_elbow, left_wrist)
+            Right_Arm_Angle = joint_angle.right_arm_angle(right_shoulder, right_elbow, right_wrist)
+            Abdomen_Angle = joint_angle.abdomen_angle(shoulder, hip, knee)
+            Back_Angle = joint_angle.back_angle(shoulder, hip)
+            Internal_Angle = joint_angle.internal_angle(hip, left_heel, right_heel)
 
             Arm_Deviation = int(abs(Left_Arm_Angle - Right_Arm_Angle))
 
@@ -89,9 +105,17 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                 msg = 'Good'
                 if Left_Arm_Angle > 120 and Right_Arm_Angle > 120:
                     stage = "Down"
-                if Left_Arm_Angle < 60 and Left_Arm_Angle < 60 and (stage == "Down" or stage == "Wrong"):
+                if Left_Arm_Angle < 60 and Left_Arm_Angle < 60 and stage == "Down":
                     stage = "Up"
                     counter += 1
+
+            if Internal_Angle < 12:
+                stage = 'Wrong'
+                if msg == "Good":
+                    msg = "Widen your legs"
+                else:
+                    msg += " \nWiden your legs"
+
 
             # Visualize
             cv2.putText(
@@ -137,7 +161,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     left_elbow, [image.shape[1], image.shape[0]]).astype(int)),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
-                (0, 0, 255) if stage == 'Wrong' else (255, 255, 255),
+                (0, 0, 255) if Arm_Deviation > 20 else (255, 255, 255),
                 2,
                 cv2.LINE_AA,
             )
@@ -149,7 +173,19 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     right_elbow, [image.shape[1], image.shape[0]]).astype(int)),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
-                (0, 0, 255) if stage == 'Wrong' else (255, 255, 255),
+                (0, 0, 255) if Arm_Deviation > 20 else (255, 255, 255),
+                2,
+                cv2.LINE_AA,
+            )
+
+            cv2.putText(
+                image,
+                "Internal: " + str(int(Internal_Angle)),
+                tuple(np.multiply(
+                    [hip[0], hip[1] * 1.2], [image.shape[1], image.shape[0]]).astype(int)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 0, 255) if Internal_Angle < 12 else (255, 255, 255),
                 2,
                 cv2.LINE_AA,
             )
@@ -182,9 +218,6 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             pass
 
         # Setup status box
-        cv2.rectangle(image, (0, 0), (600, 180), (245, 117, 16), -1)
-
-        # Rep data
         display_table(image, counter, stage, msg)
 
         # Render detection

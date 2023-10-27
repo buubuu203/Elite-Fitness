@@ -43,16 +43,21 @@ def detect_joints(lm):
 
 # Utility function for displaying the attributes on screen
 def display_table(frame , counter, stage, msg):
-    # cv2.putText(frame, "Activity : " + exercise.replace("-", " "),
-    #             (10, 65), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2,
-    #             cv2.LINE_AA)
-    # cv2.putText(frame, "Counter : " + str(counter), (10, 100),
-    #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2, cv2.LINE_AA)
-    # cv2.putText(frame, "Status : " + str(status), (10, 135),
-    #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
-    # cv2.putText(frame, "Posture : " + str(displayPos), (10, 170),
-    #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
-    # return frame
+    lines = str(msg).split("\n")
+    x, y = 15, 140
+
+    for line in lines:
+        cv2.rectangle(frame, (0, 0), (600, y + 10), (245, 117, 16), -1)
+        y += 30
+
+    y = 140
+
+    for line in lines:
+        cv2.putText(frame, str(line), (x, y), cv2.FONT_HERSHEY_SIMPLEX,
+            1, (255, 255, 255), 2, cv2.LINE_AA,
+        )
+        y += 30
+
     cv2.putText(frame, "REPEAT", (15, 20), cv2.FONT_HERSHEY_SIMPLEX,
         0.75, (0, 0, 0), 1, cv2.LINE_AA,
     )
@@ -67,9 +72,6 @@ def display_table(frame , counter, stage, msg):
     )
     cv2.putText(frame, "CORRECTION", (15, 100), cv2.FONT_HERSHEY_SIMPLEX,
         0.75, (0, 0, 0), 1, cv2.LINE_AA,
-    )
-    cv2.putText(frame, str(msg), (15, 140), cv2.FONT_HERSHEY_SIMPLEX,
-        1, (255, 255, 255), 2, cv2.LINE_AA,
     )
     return frame
     
