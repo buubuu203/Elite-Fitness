@@ -14,6 +14,8 @@ counter = 0
 stage = None
 msg = None
 frameNo = 0
+n = 2
+angularVelocity = 0
 
 Left_Leg_Angle = 0
 Right_Leg_Angle = 0
@@ -23,11 +25,12 @@ Right_Arm_Angle = 0
 Abdomen_Angle = 0
 Back_Angle = 0
 
+angles = [] * n
+
 # Setup Mediapipe instance
 with mp_pose.Pose(min_detection_confidence=0.75, min_tracking_confidence=0.75) as pose:
     while cap.isOpened():
         ret, frame = cap.read()
-        frameNo += 1
 
         # Recolor image to RGB
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -115,6 +118,19 @@ with mp_pose.Pose(min_detection_confidence=0.75, min_tracking_confidence=0.75) a
                     msg = "Widen your legs"
                 else:
                     msg += " \nWiden your legs"
+
+            # Curl velocity
+            if frameNo == 10:
+                frameNo = 0
+    
+            if frameNo == 0:
+                angles.append(Left_Arm_Angle)
+                if len(angles) == n:
+                    print(angles)
+                    w = np.array(angles).astype(int)
+                    t = np.array([0, 1/3])
+                    angularVelocity = np.gradient(w, t)[0].astype(int)
+                    angles.pop(0)
 
 
             # Visualize
@@ -218,7 +234,7 @@ with mp_pose.Pose(min_detection_confidence=0.75, min_tracking_confidence=0.75) a
             pass
 
         # Setup status box
-        display_table(image, counter, stage, msg)
+        display_table(image, counter, stage, msg, angularVelocity)
 
         # Render detection
         mp_drawing.draw_landmarks(
@@ -227,6 +243,8 @@ with mp_pose.Pose(min_detection_confidence=0.75, min_tracking_confidence=0.75) a
         )
 
         cv2.imshow("Posture Detection", image)
+
+        frameNo += 1
 
         if cv2.waitKey(10) & 0xFF == ord("q"):
             break

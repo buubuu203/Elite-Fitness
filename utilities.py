@@ -42,7 +42,7 @@ def detect_joints(lm):
 
 
 # Utility function for displaying the attributes on screen
-def display_table(frame , counter, stage, msg):
+def display_table(frame , counter, stage, msg, angularVelocity):
     lines = str(msg).split("\n")
     x, y = 15, 140
 
@@ -72,6 +72,12 @@ def display_table(frame , counter, stage, msg):
     )
     cv2.putText(frame, "CORRECTION", (15, 100), cv2.FONT_HERSHEY_SIMPLEX,
         0.75, (0, 0, 0), 1, cv2.LINE_AA,
+    )
+    cv2.putText(frame, "ANGULAR VELOCITY", (15, 220), cv2.FONT_HERSHEY_SIMPLEX,
+        0.75, (0, 0, 0), 1, cv2.LINE_AA,
+    )
+    cv2.putText(frame, str(angularVelocity), (15, 260), cv2.FONT_HERSHEY_SIMPLEX,
+        1, (255, 255, 255), 2, cv2.LINE_AA,
     )
     return frame
     
