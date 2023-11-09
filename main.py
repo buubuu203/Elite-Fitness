@@ -1,13 +1,22 @@
 import cv2
 import mediapipe as mp
-import numpy as np
+import numpy as np, pandas as pd
 from utilities import *
 from joint_angles import JointAngle
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
-cap = cv2.VideoCapture("Exercise_Videos/standard.mp4")
+# cap = cv2.VideoCapture("Exercise_Videos/standard.mp4")
+# cap = cv2.VideoCapture("Exercise_Videos/low-hands.MP4")
+cap = cv2.VideoCapture("Exercise_Videos/misaligned-hands.MP4")
+# cap = cv2.VideoCapture("Exercise_Videos/narrow-legs.MP4")
+df = pd.read_csv('./dataset/velocities.csv').drop('Unnamed: 0', axis=1)
+velocities = df.to_dict()
+angles = {
+    'leftArm': [],
+    'rightArm': [],
+}
 
 # Curl counter variables
 counter = 0
@@ -25,7 +34,6 @@ Right_Arm_Angle = 0
 Abdomen_Angle = 0
 Back_Angle = 0
 
-angles = [] * n
 
 # Setup Mediapipe instance
 with mp_pose.Pose(min_detection_confidence=0.75, min_tracking_confidence=0.75) as pose:
@@ -120,18 +128,62 @@ with mp_pose.Pose(min_detection_confidence=0.75, min_tracking_confidence=0.75) a
                     msg += " \nWiden your legs"
 
             # Curl velocity
-            if frameNo == 10:
-                frameNo = 0
-    
-            if frameNo == 0:
-                angles.append(Left_Arm_Angle)
-                if len(angles) == n:
-                    print(angles)
-                    w = np.array(angles).astype(int)
+            # if frameNo % 10 == 0:
+            #     if frameNo > 0:
+            #         velocities['frameNo'].append(frameNo) 
+            #     angles['leftArm'].append(Left_Arm_Angle)
+            #     angles['rightArm'].append(Right_Arm_Angle)
+            #     if len(angles['leftArm']) == n:
+            #         w = np.array(angles['leftArm']).astype(int)
+            #         t = np.array([0, 1/3])
+            #         angularVelocity = np.gradient(w, t)[0].astype(int)
+            #         velocities['leftArm'].append(angularVelocity)
+            #         angles['leftArm'].pop(0)
+            #     if len(angles['rightArm']) == n:
+            #         w = np.array(angles['rightArm']).astype(int)
+            #         t = np.array([0, 1/3])
+            #         angularVelocity = np.gradient(w, t)[0].astype(int)
+            #         velocities['rightArm'].append(angularVelocity)
+            #         angles['rightArm'].pop(0)
+
+            if frameNo % 10 == 0: 
+                angles['leftArm'].append(Left_Arm_Angle)
+                angles['rightArm'].append(Right_Arm_Angle)
+                if len(angles['leftArm']) == n:
+                    w = np.array(angles['leftArm']).astype(int)
                     t = np.array([0, 1/3])
                     angularVelocity = np.gradient(w, t)[0].astype(int)
-                    angles.pop(0)
+                    angles['leftArm'].pop(0)
+                    if angularVelocity > velocities['leftArm'][frameNo / 10 -1]:
+                        stage = 'Wrong'
+                        if msg == 'Good':
+                            msg = 'Left Arm - Slow down'
+                        else:
+                            msg += '\nLeft Arm - Slow down'
+                    if angularVelocity < velocities['leftArm'][frameNo / 10 -1]:
+                        stage = 'Wrong'
+                        if msg == 'Good':
+                            msg = 'Left Arm - Faster'
+                        else:
+                            msg += '\nLeft Arm - Faster'
 
+                if len(angles['rightArm']) == n:
+                    w = np.array(angles['rightArm']).astype(int)
+                    t = np.array([0, 1/3])
+                    angularVelocity = np.gradient(w, t)[0].astype(int)
+                    angles['rightArm'].pop(0)
+                    if angularVelocity > velocities['rightArm'][frameNo / 10 -1]:
+                        stage = 'Wrong'
+                        if msg == 'Good':
+                            msg = 'Right Arm - Slow down'
+                        else:
+                            msg += '\nRight Arm - Slow downSlow down'
+                    if angularVelocity < velocities['rightArm'][frameNo / 10 -1]:
+                        stage = 'Wrong'
+                        if msg == 'Good':
+                            msg = 'Right Arm - Slow downFaster'
+                        else:
+                            msg += '\nRight Arm - Slow downFaster'               
 
             # Visualize
             cv2.putText(
@@ -250,6 +302,8 @@ with mp_pose.Pose(min_detection_confidence=0.75, min_tracking_confidence=0.75) a
             break
 
     # Write to file csv
+    # df = pd.DataFrame(velocities)
+    # df.to_csv('dataset/velocities.csv')
 
 cap.release()
 cv2.destroyAllWindows()
